@@ -2,12 +2,84 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>加载中...</title>
-    <script type="text/javascript">
-        // 覆盖当前历史记录并请求 PDF 资源
-        window.location.replace("document.pdf");
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>受保护的文档查阅</title>
+    <!-- 引入 Mozilla 官方的 pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body {
+            background-color: #525659; /* 模拟阅读器背景色 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px 0;
+        }
+        /* 为渲染出来的 canvas 页面添加阴影和边距 */
+        canvas {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            /* 禁止用户选中文字 */
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+
+        /* 严密拦截打印行为：通过 CSS 媒体查询，在用户按下 Ctrl+P 时隐藏所有内容 */
+        @media print {
+            body { display: none !important; }
+        }
+    </style>
 </head>
-<body>
+<!-- oncontextmenu="return false;" 禁用全局右键菜单，防止“图片另存为” -->
+<body oncontextmenu="return false;" onselectstart="return false;">
+
+    <div id="pdf-container"></div>
+
+    <script>
+        // 配置 pdf.js 的 worker 路径
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // 你的 PDF 文件路径（需放在同一仓库下）
+        const url = 'document.pdf';
+
+        // 异步加载 PDF
+        pdfjsLib.getDocument(url).promise.then(pdf => {
+            const container = document.getElementById('pdf-container');
+            const totalPages = pdf.numPages;
+
+            // 循环遍历每一页并渲染
+            for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                pdf.getPage(pageNum).then(page => {
+                    const scale = 1.5; // 设置渲染清晰度比例
+                    const viewport = page.getViewport({ scale: scale });
+
+                    // 创建一个 canvas 元素用于绘制当前页
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    // 渲染参数配置
+                    const renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport
+                    };
+                    
+                    page.render(renderContext);
+                    container.appendChild(canvas);
+                });
+            }
+        }).catch(err => {
+            console.error('PDF 加载失败:', err);
+        });
+
+        // 拦截常规的键盘快捷键（如 Ctrl+S 保存网页, Ctrl+P 打印, F12 开发者工具）
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey && (e.key === 'p' || e.key === 'P' || e.key === 's' || e.key === 'S')) || 
+                e.key === 'F12') {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
