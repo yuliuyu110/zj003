@@ -1,9 +1,25 @@
 <!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>车间中控检验规程</title>
+    <script>
+        // 页面加载前立即执行
+        const password = prompt("请输入密码：");
+        if (password !== "123456") {
+            // 如果密码错误，清空页面内容并停止渲染
+            document.write("<h1>密码错误，拒绝访问。</h1>");
+            window.stop(); 
+        }
+    </script>
+</head>
+<body>
+    <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中心化验室管理制度手册</title>
+    <title>车间中控检验规程</title>
     <!-- 引入 Mozilla 官方的 pdf.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
@@ -81,5 +97,10 @@
             }
         });
     </script>
+</body>
+</html>
+
+    <h1>机密内容</h1>
+    <p>这是被保护的文本。</p>
 </body>
 </html>
